@@ -8,78 +8,67 @@
     <div class="py-12">
         <div class="mx-auto max-w-7xl space-y-10 sm:px-6 lg:px-8">
 
-            {{-- for gueset users --}}
-            <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    <p>Please <a href="{{ route('login') }}" class="text-blue-500">login</a> or
-                    <a href="{{ route('register') }}" class="text-blue-500">register</a>.</p>
+            {{-- for guest users --}}
+            @guest
+                <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-gray-900">
+                        <p>Please <a href="{{ route('login') }}" class="text-blue-500">login</a> or
+                            <a href="{{ route('register') }}" class="text-blue-500">register</a>.
+                        </p>
+                    </div>
                 </div>
-            </div>
+            @endguest
 
             {{-- for authenticated users --}}
-            <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                <div class="space-y-6 p-6">
-                    <h2 class="text-lg font-semibold">Your Posts</h2>
-                    <div class="rounded-md border p-5 shadow">
-                        <div class="flex items-center gap-2">
-                            <span class="flex-none rounded bg-green-100 px-2 py-1 text-green-800">Active</span>
-                            <h3><a href="#" class="text-blue-500">Post title 1</a></h3>
-                        </div>
-                        <div class="mt-4 flex items-end justify-between">
-                            <div>
-                                <div>Published: 2024-10-01</div>
-                                <div>Updated: 2024-10-10</div>
+            @auth
+                <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
+                    <div class="space-y-6 p-6">
+                        <h2 class="text-lg font-semibold">Your Posts</h2>
+
+                        @foreach ($posts as $post)
+                            {{-- Loop through the posts --}}
+                            <div class="rounded-md border p-5 shadow">
+                                <div class="flex items-center gap-2">
+                                    {{-- Display status label based on post status --}}
+                                    @if ($post->status == 'active')
+                                        <span class="flex-none rounded bg-green-100 px-2 py-1 text-green-800">Active</span>
+                                    @elseif($post->status == 'draft')
+                                        <span class="flex-none rounded bg-gray-100 px-2 py-1 text-gray-800">Draft</span>
+                                    @elseif($post->status == 'scheduled')
+                                        <span
+                                            class="flex-none rounded bg-yellow-100 px-2 py-1 text-yellow-800">Scheduled</span>
+                                    @endif
+                                    <h3><a href="{{ route('posts.show', $post) }}"
+                                            class="text-blue-500">{{ Str::limit($post->title, 60) }}</a></h3>
+                                </div>
+                                <div class="mt-4 flex items-end justify-between">
+                                    <div>
+                                        <div>Published:
+                                            {{ $post->published_at ? $post->published_at->format('Y-m-d') : '-' }}</div>
+                                        <div>Updated: {{ $post->updated_at->format('Y-m-d') }}</div>
+                                    </div>
+                                    <div>
+                                        {{-- Show edit and delete only for the post author --}}
+                                        @if ($post->user_id === auth()->id())
+                                            <a href="{{ route('posts.edit', $post) }}" class="text-blue-500">Edit</a> /
+                                            <form action="{{ route('posts.destroy', $post) }}" method="POST" class="inline"
+                                                onsubmit="return confirm('Are you sure you want to delete this post?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="text-red-500">Delete</button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <a href="#" class="text-blue-500">Detail</a> /
-                                <a href="#" class="text-blue-500">Edit</a> /
-                                <form action="#" method="POST" class="inline">
-                                    <button class="text-red-500">Delete</button>
-                                </form>
-                            </div>
-                        </div>
+                        @endforeach
+
+                        {{-- Pagination --}}
+                        <div>{{ $posts->links() }}</div>
                     </div>
-                    <div class="rounded-md border p-5 shadow">
-                        <div class="flex items-center gap-2">
-                            <span class="flex-none rounded bg-gray-100 px-2 py-1 text-gray-800">Draft</span>
-                            <h3><a href="#" class="text-blue-500">Post title 2</a></h3>
-                        </div>
-                        <div class="mt-4 flex items-end justify-between">
-                            <div>
-                                <div>Published: -</div>
-                                <div>Updated: 2024-10-10</div>
-                            </div>
-                            <div>
-                                <a href="#" class="text-blue-500">Detail</a> /
-                                <a href="#" class="text-blue-500">Edit</a> /
-                                <form action="#" method="POST" class="inline">
-                                    <button class="text-red-500">Delete</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="rounded-md border p-5 shadow">
-                        <div class="flex items-center gap-2">
-                            <span class="flex-none rounded bg-yellow-100 px-2 py-1 text-yellow-800">Scheduled</span>
-                            <h3><a href="#" class="text-blue-500">Post title 3</a></h3>
-                        </div>
-                        <div class="mt-4 flex items-end justify-between">
-                            <div>
-                                <div>Published: 2030-10-01</div>
-                                <div>Updated: 2024-10-10</div>
-                            </div>
-                            <div>
-                                <a href="#" class="text-blue-500">Detail</a> /
-                                <a href="#" class="text-blue-500">Edit</a> /
-                                <form action="#" method="POST" class="inline">
-                                    <button class="text-red-500">Delete</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    <div>Pagination Here</div>
                 </div>
-            </div>
+            @endauth
+
         </div>
     </div>
 </x-app-layout>

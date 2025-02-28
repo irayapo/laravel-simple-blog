@@ -10,7 +10,10 @@
             <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                 <div class="max-w-xl">
                     <section>
-                        <form method="post" action="#" class="space-y-6">
+                        <!-- Tambahkan @csrf di sini -->
+                        <form method="post" action="{{ route('posts.store') }}" class="space-y-6">
+                            @csrf <!-- Token CSRF ditambahkan di sini -->
+
                             <div>
                                 <x-input-label for="title" :value="__('Title')" />
                                 <x-text-input id="title" name="title" type="text" class="mt-1 block w-full" />
@@ -19,19 +22,24 @@
 
                             <div>
                                 <x-input-label for="content" :value="__('Content')" />
-                                <textarea id="content" name="content" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" rows="6"></textarea>
+                                <textarea id="content" name="content"
+                                    class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                    rows="6"></textarea>
                                 <x-input-error :messages="''" class="mt-2" />
                             </div>
 
                             <div>
                                 <x-input-label for="published_at" :value="__('Publish Date')" />
-                                <x-text-input id="published_at" name="published_at" type="date" class="mt-1 block w-full" />
+                                <x-text-input id="published_at" name="published_at" type="date"
+                                    class="mt-1 block w-full" />
                                 <x-input-error :messages="''" class="mt-2" />
                             </div>
 
                             <div>
                                 <label for="is_draft" class="inline-flex items-center">
-                                    <input id="is_draft" type="checkbox" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="is_draft">
+                                    <input id="is_draft" type="checkbox" value="1"
+                                        class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                                        name="is_draft">
                                     <span class="ms-2 text-sm text-gray-600">{{ __('Save as Draft') }}</span>
                                 </label>
                             </div>
