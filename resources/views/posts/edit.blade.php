@@ -33,15 +33,35 @@
                                 <x-input-label for="published_at" :value="__('Publish Date')" />
                                 <x-text-input id="published_at" name="published_at" type="date"
                                     class="mt-1 block w-full"
-                                    value="{{ old('published_at', $post->created_at->format('Y-m-d')) }}" />
+                                    value="{{ old('published_at', optional($post->published_at)->format('Y-m-d')) }}" />
                                 <x-input-error :messages="$errors->get('published_at')" class="mt-2" />
                             </div>
 
+
+                            <!-- Status Dropdown -->
+                            <div>
+                                <x-input-label for="status" :value="__('Status')" />
+                                <select id="status" name="status"
+                                    class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                    <option value="draft"
+                                        {{ old('status', $post->status) == 'draft' ? 'selected' : '' }}>Draft</option>
+                                    <option value="published"
+                                        {{ old('status', $post->status) == 'published' ? 'selected' : '' }}>Published
+                                    </option>
+                                    <option value="scheduled"
+                                        {{ old('status', $post->status) == 'scheduled' ? 'selected' : '' }}>Scheduled
+                                    </option>
+                                </select>
+                                <x-input-error :messages="$errors->get('status')" class="mt-2" />
+                            </div>
+
+                            <!-- Checkbox Save as Draft -->
                             <div>
                                 <label for="is_draft" class="inline-flex items-center">
                                     <input id="is_draft" type="checkbox" value="1"
                                         class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
-                                        name="is_draft" {{ $post->is_draft ? 'checked' : '' }}>
+                                        name="is_draft"
+                                        {{ old('is_draft', $post->status == 'draft' ? 'checked' : '') }}>
                                     <span class="ms-2 text-sm text-gray-600">{{ __('Save as Draft') }}</span>
                                 </label>
                             </div>
@@ -55,4 +75,22 @@
             </div>
         </div>
     </div>
+
+    <!-- JavaScript to handle draft status -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let isDraftCheckbox = document.getElementById("is_draft");
+            let statusSelect = document.getElementById("status");
+
+            function updateStatus() {
+                if (isDraftCheckbox.checked) {
+                    statusSelect.value = "draft";
+                }
+            }
+
+            isDraftCheckbox.addEventListener("change", updateStatus);
+            updateStatus();
+        });
+    </script>
+
 </x-app-layout>

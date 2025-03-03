@@ -12,9 +12,9 @@
             @guest
                 <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
-                        <p>Please <a href="{{ route('login') }}" class="text-blue-500">login</a> or
-                            <a href="{{ route('register') }}" class="text-blue-500">register</a>.
-                        </p>
+                        <h1>Welcome to the Blog</h1>
+                        <a href="{{ route('login') }}" class="text-blue-500">Login</a>
+                        <a href="{{ route('register') }}" class="text-blue-500">Register</a>
                     </div>
                 </div>
             @endguest
@@ -23,8 +23,7 @@
             @auth
                 <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                     <div class="space-y-6 p-6">
-                        <h2 class="text-lg font-semibold">Your Posts</h2>
-
+                        <h1>Your Posts</h1>
                         @foreach ($posts as $post)
                             {{-- Loop through the posts --}}
                             <div class="rounded-md border p-5 shadow">

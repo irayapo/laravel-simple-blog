@@ -13,10 +13,11 @@ return new class extends Migration
     {
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->text('content');
-            $table->string('status')->default('draft');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Pastikan ini ada
+            $table->string('title');  // Pastikan kolom ini ada
+            $table->text('content');  // Pastikan ini juga ada
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->enum('status', ['draft', 'published', 'scheduled'])->default('draft');
+            $table->timestamp('published_at')->nullable();
             $table->timestamps();
         });
     }

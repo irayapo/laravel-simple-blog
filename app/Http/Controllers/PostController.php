@@ -8,9 +8,13 @@ use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
+
     public function index()
     {
-        $posts = Post::with('user')->paginate(10);  // Menampilkan posts dengan pagination
+        $posts = Post::where('status', 'published')
+        ->orderBy('created_at', 'desc')
+        ->paginate(10);
+
         return view('posts.index', compact('posts'));
     }
 
@@ -25,71 +29,74 @@ class PostController extends Controller
     }
 
     public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => 'required|max:60',
+            'content' => 'required',
+            'status' => 'required|in:draft,published,scheduled',
+            'published_at' => 'nullable|date',
+        ]);
+    
+        // Jika checkbox draft dipilih, ubah status menjadi draft
+        if ($request->has('is_draft') && $request->input('is_draft') == 1) {
+            $validated['status'] = 'draft';
+           // Reset published_at jika draft
+        }
+    
+        $post = new Post();
+        $post->title = $validated['title'];
+        $post->content = $validated['content'];
+        $post->user_id = Auth::id();
+        $post->status = $validated['status'];
+        $post->published_at = $validated['published_at']; // Pastikan nilai tersimpan
+        $post->save();
+
+        return redirect()->route('posts.index')->with('success', 'Post created successfully.');
+    }
+
+    public function edit(Post $post)
+    {
+        if ($post->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        return view('posts.edit', compact('post'));
+    }
+
+    public function update(Request $request, Post $post)
 {
-    // Validate the form data
+    if ($post->user_id !== Auth::id()) {
+        abort(403);
+    }
+
     $validated = $request->validate([
         'title' => 'required|max:60',
         'content' => 'required',
-        'published_at' => 'nullable|date_format:Y-m-d', // Validasi format tanggal
+        'status' => 'required|in:draft,published,scheduled',
+        'published_at' => 'nullable|date',
     ]);
 
-    // Create and store the post
-    $post = new post();
-    $post->title = $request->title;
-    $post->content = $request->content;
-    $post->user_id = Auth::id();  // Assume user is logged in
-    $post->status = $request->has('is_draft') ? 'draft' : 'published';
-    $post->published_at = $request->published_at ? \Carbon\Carbon::parse($request->published_at)->format('Y-m-d') : null;
-
-    $post->save();
-
-    // Redirect after storing
-    return redirect()->route('posts.index')->with('success', 'Post created successfully!');
-}
-
-
-    public function edit(Post $post)
-{
-    // Check if the authenticated user is the owner of the post
-    if ($post->user_id !== Auth::id()) {
-        // If the user is not the owner, redirect to the index page
-        return redirect()->route('posts.index');
+    // Jika checkbox draft dipilih, set status menjadi draft
+    if ($request->has('is_draft') && $request->input('is_draft') == 1) {
+        $validated['status'] = 'draft';
+       // Reset published_at jika draft
     }
 
-    // If the user is the owner, pass the post to the edit view
-    return view('posts.edit', compact('post'));
-}
-
-
-public function update(Request $request, Post $post)
-{
-    // Validate the request
-    $validated = $request->validate([
-        'title' => 'required|string|max:255',
-        'content' => 'required|string',
-        'published_at' => 'required|date',
-        'is_draft' => 'boolean',
-    ]);
-
-    // Check if the user is authorized to update the post
-    if ($post->user_id !== Auth::id()) {
-        return redirect()->route('posts.index');
-    }
-
-    // Update the post
     $post->update($validated);
 
-    // Redirect back to the post's detail page after update
-    return redirect()->route('posts.show', $post->id)->with('success', 'Post updated successfully!');
+    return redirect()->route('posts.index')->with('success', 'Post updated successfully.');
 }
+
+
 
     public function destroy(Post $post)
     {
         if ($post->user_id !== Auth::id()) {
-            return redirect()->route('posts.index');
+            abort(403);
         }
 
         $post->delete();
+
         return redirect()->route('posts.index');
     }
 }

@@ -3,20 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Post;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
     public function index()
     {
-        if (auth()->check()) {
-            // Show all posts by authenticated user
-            $posts = Post::where('user_id', auth()->id())->paginate(10);
-        } else {
-            // Show links to login/registration pages
-            $posts = null;
-        }
-        
+        $posts = Auth::check() ? Auth::user()->posts()->paginate(10) : collect([]);
         return view('home', compact('posts'));
     }
 }
