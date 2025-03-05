@@ -11,15 +11,31 @@ class PostController extends Controller
 
     public function index()
     {
-        $posts = Post::where('status', 'published')
-        ->orderBy('created_at', 'desc')
-        ->paginate(10);
+          $posts = Post::where('status', 'published')->paginate(10); // Hanya ambil yang sudah publish
+          return view('posts.index', compact('posts'));
 
         return view('posts.index', compact('posts'));
     }
 
-    public function show(Post $post)
+    public function show($id)
     {
+        $post = Post::find($id);
+
+        if (!$post) {
+            abort(404);
+        }
+    
+        // Jika post sudah melewati tanggal publish, ubah status jadi "published"
+        if ($post->status === 'scheduled' && $post->published_at && $post->published_at <= now()) {
+            $post->status = 'published';
+            $post->save();
+        }
+    
+        // Cek apakah post bisa diakses
+        if ($post->status !== 'published' && (!auth()->check() || auth()->id() !== $post->user_id)) {
+            abort(404);
+        }
+    
         return view('posts.show', compact('post'));
     }
 

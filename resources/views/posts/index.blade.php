@@ -29,8 +29,9 @@
                     </div>
                 </div>
             @endforeach
-
-
+            <div class="mt-4">
+                {{ $posts->links() }} <!-- Display pagination links -->
+            </div>
         </div>
     </div>
 </x-app-layout>
